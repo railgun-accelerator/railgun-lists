@@ -1,3 +1,4 @@
 source 'https://rubygems.org'
 
-gem 'netaddr'
+gem 'pg'
+gem 'cidr-lite'
