@@ -1,0 +1,24 @@
+var list = ${list};
+
+function FindProxyForURL(url, host) {
+    var direct = 'DIRECT';
+    var proxy = 'HTTPS {{https_proxy}}; PROXY {{http_proxy}}';
+    //if (isPlainHostName(host) || shExpMatch(host,"*.local")){
+    if ( host.indexOf('.') === -1 || host.indexOf('.local', host.length - '.local'.length) !== -1 ){
+        return direct;
+    }
+    try {
+        var address = dnsResolve(host).split('.');
+    } catch (error) {
+        return proxy;
+    }
+    address = (((((((parseInt(address[0]))<<8)|(parseInt(address[1])))<<8)|(parseInt(address[2])))<<8)|(parseInt(address[3]))) >>> 0;
+    for (var netmask in list)
+    {
+        if (list.hasOwnProperty(netmask) && list[netmask][(address & parseInt(netmask)) >>> 0]){
+            return direct;
+        }
+    }
+    //alert(address|proxy)
+    return proxy;
+}
