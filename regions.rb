@@ -1,6 +1,6 @@
 require 'csv'
 require 'pg'
-require 'netaddr'
+require 'open3'
 
 $geonames = {}
 $routes = Hash.new { |hash, key| hash[key] = [] }
@@ -28,7 +28,9 @@ conn.prepare 'insert_address', "INSERT INTO addresses (address, region_id) VALUE
 conn.transaction do |conn|
   conn.exec 'truncate table addresses'
   $routes.each_pair do |region_id, addresses|
-    NetAddr.merge(addresses.map{|address|NetAddr::CIDR.create(address)}).each do |address|
+    stdout, stderr, status = Open3.capture3 "perl aggregate-cidr-addresses.pl", stdin_data: addresses.join("\n")
+    stdout.lines.each do |line|
+      address = line.chomp
       conn.exec_prepared 'insert_address', [address, region_id]
     end
   end
